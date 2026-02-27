@@ -128,18 +128,20 @@ def highlight_text(text, matches, chunk_size=1000):
             'end': adjusted_end
         })
     
-    # 重新生成高亮文本
+    # 重新生成高亮文本，为每个匹配项添加锚点
     final_result = []
     last_end = 0
     
-    for match in adjusted_matches:
+    for match_index, match in enumerate(adjusted_matches):
         # 添加匹配前的文本
         final_result.append(text_with_breaks[last_end:match['start']])
         
-        # 添加带高亮的匹配文本
+        # 添加带高亮和锚点的匹配文本
         matched_text = text_with_breaks[match['start']:match['end']]
         highlight_class = 'highlight-exact' if match['type'] == 'exact' else 'highlight-fuzzy'
-        final_result.append(f'<span class="{highlight_class}">{matched_text}</span>')
+        # 添加锚点ID，格式：match_索引
+        anchor_id = f"match_{match_index}"
+        final_result.append(f'<span id="{anchor_id}" class="{highlight_class}">{matched_text}</span>')
         
         last_end = match['end']
     

@@ -1,6 +1,26 @@
 import pandas as pd
 from docx import Document
 import os
+import io
+
+
+def read_text_content(content):
+    """从字节内容读取文本"""
+    return content.decode('utf-8')
+
+
+def read_docx_content(content):
+    """从字节内容读取Word文档"""
+    doc = Document(io.BytesIO(content))
+    full_text = []
+    for para in doc.paragraphs:
+        full_text.append(para.text)
+    return '\n'.join(full_text)
+
+
+def read_spreadsheet_content(content):
+    """从字节内容读取Excel或CSV"""
+    return pd.read_excel(io.BytesIO(content))
 
 
 def read_text_file(file_path):
@@ -38,5 +58,21 @@ def read_file(file_path):
         return read_docx_file(file_path)
     elif ext in ['.xlsx', '.csv']:
         return read_spreadsheet_file(file_path)
+    else:
+        raise ValueError(f"Unsupported file format: {ext}")
+
+
+def read_file_from_upload(uploaded_file):
+    """从Streamlit上传文件直接读取内容，无需创建临时文件"""
+    file_name = uploaded_file.name
+    ext = os.path.splitext(file_name)[1].lower()
+    content = uploaded_file.getbuffer()
+    
+    if ext == '.txt':
+        return content.decode('utf-8')
+    elif ext == '.docx':
+        return read_docx_content(content)
+    elif ext in ['.xlsx', '.csv']:
+        return pd.read_excel(io.BytesIO(content))
     else:
         raise ValueError(f"Unsupported file format: {ext}")
